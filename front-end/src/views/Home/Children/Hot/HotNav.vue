@@ -13,7 +13,7 @@
 
     <!--自定义进度条-->
     <div class="hot-nav-bottom">
-      <div class="hot-nav-bottom-inner"></div>
+      <div class="hot-nav-bottom-inner" :style="innerBarStyle"></div>
     </div>
   </div>
 </template>
@@ -41,11 +41,86 @@ export default {
         {iconurl: require('../../imgs/nav/nav_icon14.png'), icontitle: '品牌馆'},
         {iconurl: require('../../imgs/nav/nav_icon15.png'), icontitle: '品牌馆'},
         {iconurl: require('../../imgs/nav/nav_icon16.png'), icontitle: '品牌馆'}
-      ]
+      ],
+      // 屏幕的宽度
+      screenW: window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth,
+      // 滚动内容的宽度
+      scrollContentW: 720,
+      // 滚动条背景的宽度
+      scrollBgW: 100,
+      // 滚动条的长度
+      barWidth: 0,
+      // 起点
+      startX: 0,
+      // 结束点
+      endFlag: 0,
+      // 小红条移动距离
+      barMoveWidth: 0
     }
   },
 
-  methods: {}
+  computed: {
+    innerBarStyle () {
+      return {
+        width: `${this.barWidth}px`,
+        left: `${this.barMoveWidth}px`
+      }
+    }
+  },
+
+  methods: {
+    // 获取滚动条的长度
+    getBarWidth () {
+      this.barWidth = this.scrollBgW * (this.screenW / this.scrollContentW)
+    },
+
+    // 移动端事件监听
+    bindEvent () {
+      // 这里也可以使用$refs，$el
+      this.$el.addEventListener('touchstart', this.handleTouchStart, false);
+      this.$el.addEventListener('touchmove', this.handleTouchMove, false);
+      this.$el.addEventListener('touchend', this.handleTouchEnd, false);
+    },
+
+    // 开始触摸
+    handleTouchStart (e) {
+      // console.log(e.touches);
+      // 获取第一个触摸点
+      let touch = e.touches[0];
+      // 求出起点
+      this.startX = Number(touch.pageX);
+    },
+
+    // 开始移动
+    handleTouchMove (e) {
+      // console.log(e.touches);
+      // 获取第一个触摸点
+      let touch = e.touches[0];
+      // 求出触摸点移动距离
+      let moveWidth = Number(touch.pageX) - this.startX;
+      // 求出滚动条滑动距离,滚动条跟触摸点是相反方向移动
+      this.barMoveWidth = -(moveWidth * (this.scrollBgW / this.scrollContentW) - this.endFlag);
+
+      // 边界处理
+      if (this.barMoveWidth <= 0) {
+        this.barMoveWidth = 0;
+      }
+      if (this.barMoveWidth >= this.scrollBgW - this.barWidth) {
+        this.barMoveWidth = this.scrollBgW - this.barWidth;
+      }
+    },
+
+    // 结束触摸
+    handleTouchEnd (e) {
+      // console.log(e.touches);
+      this.endFlag = this.barMoveWidth;
+    }
+  },
+
+  mounted () {
+    this.getBarWidth();
+    this.bindEvent();
+  }
 }
 </script>
 
@@ -93,13 +168,12 @@ export default {
 
   // 自定义进度条
   .hot-nav-bottom {
-    // width: 100%;
-    width: 50px;
+    width: 100px;
     height: 2px;
     background-color: #ccc;
     position: absolute;
     left: 50%;
-    // margin-left: -50px;
+    margin-left: -50px;
     bottom: 6px;
 
     .hot-nav-bottom-inner {
