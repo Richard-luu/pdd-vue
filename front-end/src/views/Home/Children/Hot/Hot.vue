@@ -39,6 +39,11 @@ import 'swiper/dist/css/swiper.min.css';
 import HotNav from './HotNav';
 import HotShopList from './HotShopList';
 
+// 使用vuex
+import {
+  mapState
+} from 'vuex';
+
 export default {
   name: 'Hot',
 
@@ -50,19 +55,44 @@ export default {
     HotNav, HotShopList
   },
 
+  computed: {
+    // 这里也可以使用$store.state.reqHomeCasual
+    ...mapState(['reqHomeCasual'])
+  },
+
   methods: {},
 
   mounted () {
-    new Swiper('.swiper-container', {
-      loop: true, // 循环模式选项
+    // new Swiper('.swiper-container', {
+    //   loop: true, // 循环模式选项
 
-      autoplay: true,
+    //   autoplay: true,
 
-      // 如果需要分页器
-      pagination: {
-        el: '.swiper-pagination'
-      }
-    });
+    //   // 如果需要分页器
+    //   pagination: {
+    //     el: '.swiper-pagination'
+    //   }
+    // });
+
+    // 派发一个动作请求首页轮播数据  后台接口还没写，写了再放出来
+    // this.$store.dispatch('reqHomeCasual');
+  },
+
+  watch: {
+    reqHomeCasual () {
+      this.$nextTick(() => {
+        new Swiper('.swiper-container', {
+          loop: true, // 循环模式选项
+
+          autoplay: true,
+
+          // 如果需要分页器
+          pagination: {
+            el: '.swiper-pagination'
+          }
+        });
+      });
+    }
   }
 }
 </script>
